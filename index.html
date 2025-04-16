@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>G2 Methodology Trainer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <style>
+        /* G2 Color Palette */
+        :root {
+            --g2-orange: #FF492C;
+            --g2-purple: #5746B2;
+            --g2-blue: #288DFF;
+            --g2-green: #27D3BC;
+            --g2-yellow: #FFC800;
+            --g2-dark-blue: #062846;
+            --g2-black: #000000;
+            --g2-white: #ffffff;
+            --g2-light-gray: #f8f9fa; /* Adding a light gray for subtle backgrounds */
+            --g2-medium-gray: #ced4da; /* Adding for borders */
+            --g2-dark-gray: #495057; /* Adding for secondary text */
+        }
+
+        /* Apply Figtree font and G2 background/text colors */
+        body {
+            font-family: 'Figtree', sans-serif;
+            font-weight: 400; /* Figtree Regular */
+            background-color: var(--g2-dark-blue); /* Dark blue background */
+            color: var(--g2-dark-blue); /* Default text color on white */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1rem;
+            line-height: 1.6;
+        }
+
+        /* Game container styling - white background like G2 site */
+        .game-container {
+            border: 1px solid var(--g2-medium-gray);
+            background-color: var(--g2-white);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            width: 100%;
+            max-width: 800px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Text styling */
+        h1, h2, h3, label, button, select, p, div, a {
+            font-family: 'Figtree', sans-serif;
+        }
+        h1, h2, h3, button {
+            font-weight: 700; /* Figtree Bold */
+        }
+        h1 { color: var(--g2-blue); }
+        h2 { color: var(--g2-purple); }
+        h3 { color: var(--g2-orange); }
+        label { color: var(--g2-dark-blue); font-weight: 700; display: block; margin-bottom: 0.25rem; }
+        p { margin-bottom: 1rem; }
+
+        /* Button styling - Modern G2 Style */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 700; /* Figtree Bold */
+            color: var(--g2-white);
+            background-color: var(--g2-orange); /* Default: G2 Orange */
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            display: inline-block;
+            text-align: center;
+            line-height: 1.5;
+        }
+        .btn:hover:not(:disabled) {
+            filter: brightness(1.1);
+        }
+        .btn:active:not(:disabled) {
+             transform: scale(0.98);
+        }
+        .btn:disabled {
+             background-color: var(--g2-medium-gray); color: var(--g2-dark-gray); cursor: not-allowed;
+             transform: none !important;
+        }
+        /* Primary Button (Next Question) */
+        .btn-primary { background-color: var(--g2-blue); }
+        /* Alt Button (Try Again) */
+        .btn-alt { background-color: var(--g2-yellow); color: var(--g2-dark-blue); }
+        /* Launch/Example Button (Show Example) */
+        .btn-launch { background-color: var(--g2-green); color: var(--g2-dark-blue); }
+        /* Secondary Button (Modal Close) */
+        .btn-secondary { background-color: var(--g2-dark-gray); }
+
+
+        /* Input/Textarea/Select styling */
+        textarea, select {
+            font-family: 'Figtree', sans-serif;
+            font-weight: 400;
+            background-color: var(--g2-white);
+            border: 1px solid var(--g2-medium-gray);
+            color: var(--g2-dark-blue);
+            padding: 10px;
+            border-radius: 4px;
+            outline: none;
+            resize: none;
+            width: 100%;
+            transition: border-color 0.2s ease;
+        }
+         textarea:focus, select:focus {
+             border-color: var(--g2-blue);
+             box-shadow: 0 0 0 2px rgba(40, 141, 255, 0.2);
+         }
+         textarea:disabled { background-color: var(--g2-light-gray); color: var(--g2-dark-gray); cursor: not-allowed; }
+         textarea::placeholder { color: var(--g2-dark-gray); opacity: 0.7; }
+        select {
+            appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg fill="%23062846" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>'); /* Dark arrow */
+            background-repeat: no-repeat; background-position: right 10px center; background-size: 18px; padding-right: 35px;
+        }
+        option.completed-level { color: var(--g2-green) !important; font-weight: 700; }
+
+
+        /* Feedback styling - using G2 colors */
+        .feedback-area {
+            border: 1px dashed var(--g2-medium-gray);
+            background-color: var(--g2-light-gray);
+            padding: 1.5rem;
+            border-radius: 4px;
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .feedback-item { margin-bottom: 8px; padding: 8px 12px; border-radius: 4px; transition: background-color 0.2s ease, transform 0.2s ease; border-left-width: 4px; border-left-style: solid; }
+        .feedback-good { color: var(--g2-dark-blue); background-color: rgba(39, 211, 188, 0.1); border-left-color: var(--g2-green); } /* Green */
+        .feedback-improve { color: var(--g2-dark-blue); background-color: rgba(255, 200, 0, 0.1); border-left-color: var(--g2-yellow); } /* Yellow */
+        .feedback-critical { color: var(--g2-dark-blue); background-color: rgba(255, 73, 44, 0.1); border-left-color: var(--g2-orange); } /* Orange */
+        .feedback-bonus { color: var(--g2-dark-blue); background-color: rgba(87, 70, 178, 0.1); border-left-color: var(--g2-purple); font-weight: 700; } /* Purple */
+        .feedback-highlight { background-color: rgba(40, 141, 255, 0.2) !important; transform: scale(1.01); } /* Blue highlight */
+
+
+        /* Animations */
+        @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .flash-success { animation: flash 0.5s 2; color: var(--g2-green); }
+        .flash-fail { animation: flash 0.5s 2; color: var(--g2-orange); }
+        .flash-perfect { animation: flash 0.6s 3; color: var(--g2-purple); }
+
+        /* Icon Animation */
+        @keyframes iconPop { 0% { transform: scale(0.8); opacity: 0; } 70% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+        #winIcon { font-size: 3rem; display: inline-block; }
+        .animate-icon { animation: iconPop 0.8s ease-out forwards; }
+
+
+        /* Hide scrollbar */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Score animation style */
+        .score-animating { color: var(--g2-blue); transform: scale(1.1); transition: color 0.1s ease-out, transform 0.1s ease-out; }
+
+        /* Consistent minimum height for content screens */
+        .content-screen { min-height: 450px; /* Adjusted slightly */ }
+
+        /* Modal Styles - G2 Themed */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(6, 40, 70, 0.7); /* Dark blue overlay */ display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background-color: var(--g2-white); border: 1px solid var(--g2-medium-gray); border-radius: 8px; padding: 2rem; text-align: center; max-width: 90%; width: 550px; position: relative; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); }
+        .modal-close-btn { position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 1.8rem; color: var(--g2-dark-gray); cursor: pointer; font-family: sans-serif; padding: 0; line-height: 1; font-weight: 300; }
+         .modal-close-btn:hover { color: var(--g2-orange); }
+        #modalAnswerDisplay { background-color: var(--g2-light-gray); border: 1px solid var(--g2-medium-gray); color: var(--g2-dark-blue); padding: 15px; border-radius: 4px; width: 100%; height: 180px; overflow-y: auto; margin-top: 1rem; margin-bottom: 1.5rem; text-align: left; font-size: 0.9rem; white-space: pre-wrap; }
+
+    </style>
+</head>
+<body>
+    <div class="game-container p-6 md:p-8">
+        <div class="flex justify-between items-center mb-6 border-b border-gray-200 pb-4">
+            <h1 class="text-2xl md:text-3xl">G2 Methodology Trainer</h1>
+            <div class="text-right">
+                <div class="text-lg text-green-600 font-bold">SCORE: <span id="score" class="transition-all duration-100">0</span></div>
+                <div class="text-lg text-yellow-600 font-bold">LIVES: <span id="lives">5</span></div>
+            </div>
+        </div>
+
+        <div id="levelSelectionArea" class="mb-6">
+            <label for="levelSelect" class="text-base mb-2">Select Training Module:</label>
+            <select id="levelSelect" class="w-full text-base"></select>
+        </div>
+
+        <div id="challengeScreen" class="content-screen mb-6 p-5 border border-gray-200 rounded-md bg-white">
+             <h2 class="text-xl md:text-2xl mb-4">Incoming Question!</h2>
+            <p class="font-bold text-gray-700 mb-1">SITUATION:</p>
+            <p id="scenarioText" class="mb-4 text-gray-600 text-sm md:text-base h-24 overflow-y-auto no-scrollbar">Select a training module to start...</p>
+            <p class="font-bold text-red-600 mb-1">INCORRECT UNDERSTANDING:</p>
+            <p id="weakPromptText" class="text-gray-500 italic mb-4 text-sm md:text-base h-16 overflow-y-auto no-scrollbar"></p>
+            <label for="userPrompt" class="text-base mb-2">Enter Correct Explanation/Application:</label>
+            <textarea id="userPrompt" rows="5" class="w-full mb-4 text-sm md:text-base" placeholder="Explain the G2 concept here..."></textarea>
+            <button id="submitBtn" class="btn w-full text-base" disabled>Submit Analysis!</button>
+        </div>
+
+        <div id="resultsScreen" class="content-screen feedback-area hidden">
+             <div class="flex-grow">
+                 <h3 id="resultTitle" class="text-xl md:text-2xl text-center mb-5">Analyzing...</h3>
+                 <div id="feedbackOutput" class="text-sm max-h-56 overflow-y-auto no-scrollbar mb-5"></div>
+             </div>
+             <div class="text-center mt-auto pt-4">
+                  <button id="showExampleBtn" class="btn btn-launch hidden mb-4 text-base">Show Example Answer</button>
+                  <div class="flex justify-center space-x-4">
+                      <button id="tryAgainBtn" class="btn btn-alt text-base">Try Again</button>
+                      <button id="nextChallengeBtn" class="btn btn-primary text-base">Next Question</button>
+                  </div>
+             </div>
+        </div>
+
+         <div id="gameOverScreen" class="text-center p-8 hidden">
+             <h2 class="text-3xl text-red-600 mb-5">TRAINING FAILED!</h2>
+             <p class="text-xl mb-6">Final Score: <span id="finalScore" class="text-yellow-600 font-bold">0</span></p>
+             <button id="restartBtn" class="btn text-lg">Restart Training</button>
+         </div>
+
+         <div id="winScreen" class="text-center p-8 hidden">
+             <h2 class="text-3xl text-green-600 mb-3">MODULE COMPLETE!</h2>
+             <p class="text-xl mb-6 text-gray-700">Module Cleared: <span id="clearedZoneName" class="font-bold"></span></p>
+             <div class="my-8 h-20 relative flex justify-center items-end"> <span id="winIcon" class="">🏆</span> </div> <button id="playAgainBtn" class="btn text-lg">Play Again (Reset)</button>
+             </div>
+
+        <p class="text-xs text-center text-gray-500 mt-6">
+            Based on the G2 Research Methodology documentation.
+        </p>
+    </div>
+
+    <div id="exampleModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button id="closeModalBtn" class="modal-close-btn">&times;</button> <h3 class="text-xl text-center mb-4">Example Answer</h3>
+            <p class="text-sm text-gray-600 mb-4 leading-relaxed text-center">
+                Here's an example of a strong explanation based on the G2 methodology:
+            </p>
+            <div id="modalAnswerDisplay" class="no-scrollbar"></div>
+            <div class="flex justify-center mt-6">
+                 <button id="closeModalBtnInner" class="btn btn-secondary text-base">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- G2 Methodology Feedback Points (Copied from previous version) ---
+        const g2FeedbackPoints = {
+            corePrinciples: { authenticity: "Mention reliance on authentic user feedback, not analyst opinions?", transparency: "Reference transparent methodologies?", objectivity: "Highlight use of objective, quantifiable data?", buyerFocus: "Mention the buyer-centric perspective?" },
+            categorization: { b2b: "Specify that products must be B2B?", functionality: "Explain categorization is based on functionality/features, not use case?", hierarchy: "Describe the category hierarchy (High-level, Mid-level, Child)?" },
+            scoringComponents: { satisfaction: "Identify the Satisfaction Score component?", marketPresence: "Identify the Market Presence Score component?", bothComponents: "Mention BOTH Satisfaction and Market Presence are used?" },
+            satisfactionFactors: { userAttributes: "Include satisfaction with end-user product attributes?", reviewQuality: "Mention review quality/completeness matters?", reviewAge: "Reference review age/recency as a factor?", nps: "Include overall satisfaction/NPS?" },
+            marketPresenceFactors: { g2Reviews: "Include G2 review metrics (quantity)?", thirdParty: "Mention data from third-party sources/social networks?", companySize: "Reference vendor employee count/growth?", webPresence: "Include vendor web presence/social influence?" },
+            gridReport: { axes: "Identify the Grid axes as Satisfaction and Market Presence?", quadrants: "Name at least two Grid quadrants (Leaders, High Performers, Contenders, Niche)?", interpretation: "Explain what a specific quadrant generally signifies (e.g., Leaders = High Sat & MP)?", eligibility: "Mention the minimum review count needed for a Grid report?" },
+            indexReport: { purpose: "Explain Index Reports focus on specific areas (Usability, Implementation, etc.)?", example: "Name at least one specific Index Report type (Usability, Relationship, etc.)?", basis: "Mention Index Reports use specific review questions?" },
+            momentumGrid: { purpose: "Explain the Momentum Grid shows growth trajectory?", factors: "Name at least two factors influencing Momentum (Review Growth, Web Growth, etc.)?" }
+        };
+
+        // --- Game Data (G2 Themed - Copied from previous version) ---
+        const gameData = {
+             "Core Principles & Categorization": [
+                 { scenario: "A new colleague asks what makes G2 Research different from traditional analyst firms.", weakPrompt: "G2 is just based on reviews.", examplePrompt: "G2 Research stands out because it relies primarily on authentic, verified user reviews, not subjective analyst opinions[cite: 6]. It uses transparent methodologies [cite: 6] and objective data [cite: 6] to provide a buyer-centric perspective[cite: 6], helping users make informed decisions.", feedbackPoints: g2FeedbackPoints.corePrinciples, keywords: { authenticity: /authentic|user review|real users/i, transparency: /transparent|clear/i, objectivity: /objective|quantifiable|data-driven/i, buyerFocus: /buyer|decision/i } },
+                 { scenario: "Someone wants to list their new consumer mobile game on G2. Explain G2's basic product criteria.", weakPrompt: "Sure, list your game!", examplePrompt: "To be listed on G2, a product generally needs to be a B2B software product or service[cite: 7]. Consumer games typically don't fit this criteria. Products are also categorized based on their specific functionality[cite: 7], not just the user base.", feedbackPoints: g2FeedbackPoints.categorization, keywords: { b2b: /b2b|business-to-business/i, functionality: /functionality|features/i, hierarchy: /hierarchy|category|parent|child/i } },
+                 { scenario: "Explain how G2 organizes its software categories.", weakPrompt: "They just list software types.", examplePrompt: "G2 uses a category hierarchy. It starts with broad, high-level parent categories like 'Sales Software', then narrows down to mid-level categories like 'Quote Management', and finally specific child categories like 'Pricing Software' that have no further subcategories[cite: 10]. This helps buyers find specific solutions.", feedbackPoints: g2FeedbackPoints.categorization, keywords: { b2b: /b2b|business-to-business/i, functionality: /functionality|features/i, hierarchy: /hierarchy|category|parent|child|level/i } },
+                 { scenario: "A vendor asks if their product can be listed in multiple categories if it has diverse features.", weakPrompt: "No, only one category per product.", examplePrompt: "Yes, G2 allows multi-category products[cite: 9]. If a product's feature set genuinely spans the functionality defined for more than one category, it can potentially be listed in multiple relevant categories.", feedbackPoints: g2FeedbackPoints.categorization, keywords: { b2b: /b2b/i, functionality: /functionality|features/i, hierarchy: /multi-category|multiple categories|more than one/i } },
+                 { scenario: "What's the difference between a Standard Product and a Product Suite on G2?", weakPrompt: "They are basically the same.", examplePrompt: "A Standard Product on G2 is an individual software with specific functions[cite: 9]. A Product Suite is a combination of products from one vendor, offering broader, often integrated, features and functionality[cite: 9]. Suites are scored by aggregating across their component categories[cite: 15].", feedbackPoints: g2FeedbackPoints.categorization, keywords: { b2b:/product type/i, functionality: /standard product|individual|suite|combination|aggregate/i, hierarchy:/suite|standard/i } }
+             ],
+            "Scoring Factors": [
+                 { scenario: "How is the overall G2 Score for a software product calculated?", weakPrompt: "It's based on how many reviews they have.", examplePrompt: "A product's G2 Score is calculated using two main components: the Satisfaction score [cite: 11] and the Market Presence score[cite: 11]. Both contribute to the final placement on reports like the G2 Grid.", feedbackPoints: g2FeedbackPoints.scoringComponents, keywords: { satisfaction: /satisfaction/i, marketPresence: /market presence/i, bothComponents: /satisfaction.*market presence|market presence.*satisfaction|two components|both/i } },
+                 { scenario: "A vendor wants to improve their Satisfaction score. What factors should they focus on?", weakPrompt: "Just get more 5-star reviews.", examplePrompt: "Improving the Satisfaction score involves several factors. Key areas include enhancing user satisfaction with product attributes, the quality and completeness of reviews (not just quantity)[cite: 12, 22], ensuring reviews are recent (age impacts weight)[cite: 12, 22], and overall customer satisfaction indicated by NPS[cite: 12].", feedbackPoints: g2FeedbackPoints.satisfactionFactors, keywords: { userAttributes: /attributes|features|usability/i, reviewQuality: /quality|completeness|thorough/i, reviewAge: /age|recent|recency/i, nps: /nps|net promoter|overall satisfaction/i } },
+                 { scenario: "What contributes to a product's Market Presence score on G2?", weakPrompt: "It's just how big the company is.", examplePrompt: "Market Presence includes G2 review metrics, data from third-party sources and social networks, vendor employee count and growth, the vendor's web presence and social influence, and the age of the product[cite: 12].", feedbackPoints: g2FeedbackPoints.marketPresenceFactors, keywords: { g2Reviews: /g2 reviews|review metrics/i, thirdParty: /third party|external sources|social networks/i, companySize: /employee|company size|growth/i, webPresence: /web presence|social influence|website/i } },
+                 { scenario: "How does G2 handle scoring for Service Providers compared to Software Products?", weakPrompt: "It's exactly the same scoring.", examplePrompt: "Service Provider scoring uses Satisfaction [cite: 13] and Market Presence/Proficiency scores[cite: 13]. The 'Market Presence/Proficiency' factors assess the provider's experience and reach[cite: 14], while Satisfaction factors are tailored to service evaluation[cite: 14].", feedbackPoints: g2FeedbackPoints.scoringComponents, keywords: { satisfaction: /satisfaction|service satisfaction/i, marketPresence: /market presence|proficiency|service provider presence/i, bothComponents: /service provider|proficiency|experience|reach/i } },
+                 { scenario: "Do older reviews count the same as new reviews in G2 scores?", weakPrompt: "Yes, all reviews count equally.", examplePrompt: "No, review age is a key factor. Reviews lose value as they age (approx. -30% per year) [cite: 21] because more recent reviews provide more relevant information about the product's current state[cite: 12, 22].", feedbackPoints: g2FeedbackPoints.satisfactionFactors, keywords: { userAttributes: /weighting/i, reviewQuality:/older review/i , reviewAge: /age|recent|recency|lose value|older/i, nps:/weight/i } }
+            ],
+            "Market Reports": [
+                 { scenario: "Explain the main purpose and axes of the G2 Grid® Report.", weakPrompt: "It's a graph showing popular software.", examplePrompt: "The G2 Grid® Report plots products within a category based on their Satisfaction score (y-axis) and Market Presence score (x-axis)[cite: 16]. It helps buyers understand the competitive landscape[cite: 16].", feedbackPoints: g2FeedbackPoints.gridReport, keywords: { axes: /axis|axes|satisfaction.*market presence|market presence.*satisfaction/i, quadrants: /leader|high performer|contender|niche|quadrant/i, interpretation: /landscape|compare|position/i, eligibility: /reviews|eligible|minimum/i } },
+                 { scenario: "A product is in the 'Leaders' quadrant on a G2 Grid. What does that typically mean?", weakPrompt: "It means they paid G2 a lot.", examplePrompt: "Being in the Leaders quadrant means a product has high Satisfaction scores AND high Market Presence scores relative to others in the category[cite: 17]. It indicates strong customer satisfaction combined with significant market standing.", feedbackPoints: g2FeedbackPoints.gridReport, keywords: { axes:/quadrant/i, quadrants: /leader|high performer|contender|niche/i, interpretation: /leader.*high satisfaction.*high market|high sat.*high mp/i, eligibility:/score/i } },
+                 { scenario: "What's the difference between a Grid Report and an Index Report?", weakPrompt: "They are just different ways to show scores.", examplePrompt: "Grid Reports plot overall Satisfaction vs. Market Presence[cite: 16]. Index Reports, like the Usability Index or Relationship Index, dive deeper into specific aspects like ease of use or support quality[cite: 19], using unique algorithms based on specific review questions[cite: 19].", feedbackPoints: g2FeedbackPoints.indexReport, keywords: { purpose: /index|specific area|usability|implementation|relationship|results/i, example: /usability|implementation|relationship|results|index type/i, basis: /specific questions|subset of questions/i } },
+                 { scenario: "What does the G2 Momentum Grid® show?", weakPrompt: "It shows which products are currently the best.", examplePrompt: "The Momentum Grid® measures a product's growth trajectory[cite: 20]. It uses factors like employee growth, review growth, social growth, and web growth [cite: 25] to indicate which products are gaining momentum.", feedbackPoints: g2FeedbackPoints.momentumGrid, keywords: { purpose: /momentum|growth|trajectory/i, factors: /employee growth|review growth|social growth|web growth|momentum factors/i } },
+                 { scenario: "How does G2 define its market segments like Small Business, Mid-Market, and Enterprise?", weakPrompt: "It's just based on company revenue.", examplePrompt: "G2 defines market segments based on company employee count: Small Business (50 or fewer), Mid-Market (51-1,000), and Enterprise (1,001+)[cite: 23]. Segment Grids analyze products for these specific audiences[cite: 20].", feedbackPoints: g2FeedbackPoints.marketPresenceFactors, keywords: { g2Reviews:/segment/i, thirdParty:/small business|smb|mid market|enterprise/i, companySize: /employee|company size|number of employees/i, webPresence:/segment/i } }
+            ]
+        };
+
+        // --- DOM Elements ---
+        const levelSelect = document.getElementById('levelSelect');
+        const scoreDisplay = document.getElementById('score');
+        const livesDisplay = document.getElementById('lives');
+        const challengeScreen = document.getElementById('challengeScreen');
+        const resultsScreen = document.getElementById('resultsScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const winScreen = document.getElementById('winScreen');
+        const levelSelectionArea = document.getElementById('levelSelectionArea');
+        const scenarioText = document.getElementById('scenarioText');
+        const weakPromptText = document.getElementById('weakPromptText');
+        const userPrompt = document.getElementById('userPrompt');
+        const submitBtn = document.getElementById('submitBtn');
+        const resultTitle = document.getElementById('resultTitle');
+        const feedbackOutput = document.getElementById('feedbackOutput');
+        const tryAgainBtn = document.getElementById('tryAgainBtn');
+        const nextChallengeBtn = document.getElementById('nextChallengeBtn');
+        const finalScoreDisplay = document.getElementById('finalScore');
+        const restartBtn = document.getElementById('restartBtn');
+        const playAgainBtn = document.getElementById('playAgainBtn');
+        const winIcon = document.getElementById('winIcon'); // Renamed from missile
+        const clearedZoneName = document.getElementById('clearedZoneName');
+        // Modal Elements
+        const showExampleBtn = document.getElementById('showExampleBtn');
+        const exampleModal = document.getElementById('exampleModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const closeModalBtnInner = document.getElementById('closeModalBtnInner');
+        const modalAnswerDisplay = document.getElementById('modalAnswerDisplay');
+
+
+        // --- Game State ---
+        let score = 0;
+        let lives = 5;
+        let currentLevel = '';
+        let currentChallengeIndex = -1;
+        let currentChallengeData = null;
+        let completedChallengesByLevel = {};
+        let completedLevels = [];
+        let scoreAnimationInterval = null;
+        let isEvaluating = false;
+        let lastExampleAnswer = "";
+        let lastChallengeSuccess = false;
+
+        // --- Sound Effects (Tone.js - Minimal sounds for a cleaner feel) ---
+        const synth = new Tone.Synth({ oscillator: { type: "sine" }, envelope: { attack: 0.01, decay: 0.1, sustain: 0.1, release: 0.2 } }).toDestination();
+        synth.volume.value = -15;
+        const polySynth = new Tone.PolySynth(Tone.Synth, { oscillator: { type: "sine" }, envelope: { attack: 0.01, decay: 0.2, sustain: 0.1, release: 0.3 } }).toDestination();
+        polySynth.volume.value = -12;
+        const bonusSynth = new Tone.Synth({ oscillator: { type: "triangle" }, envelope: { attack: 0.01, decay: 0.3, sustain: 0.1, release: 0.4 } }).toDestination();
+         bonusSynth.volume.value = -10;
+        const failSynth = new Tone.Synth({ oscillator: { type: "square" }, envelope: { attack: 0.01, decay: 0.2, sustain: 0, release: 0.2 } }).toDestination();
+         failSynth.volume.value = -18;
+         const winSynth = new Tone.PolySynth(Tone.Synth, { oscillator: { type: "triangle" }, envelope: { attack: 0.05, decay: 0.5, sustain: 0.2, release: 1 } }).toDestination();
+         winSynth.volume.value = -10;
+
+
+         function playSound(type) {
+             if (Tone.context.state !== 'running') {
+                 Tone.start().then(() => _playSoundInternal(type)).catch(e => console.error("Error starting Tone:", e));
+             } else {
+                 _playSoundInternal(type);
+             }
+         }
+
+         function _playSoundInternal(type) {
+             const now = Tone.now();
+             try {
+                 // Simplified sounds
+                 if (type === 'submit') synth.triggerAttackRelease("E4", "16n", now);
+                 else if (type === 'success') polySynth.triggerAttackRelease(["C5", "G5"], "8n", now);
+                 else if (type === 'fail') failSynth.triggerAttackRelease("C3", "8n", now);
+                 else if (type === 'gameOver') failSynth.triggerAttackRelease("G2", "4n", now);
+                 else if (type === 'next') synth.triggerAttackRelease("G4", "16n", now);
+                 // else if (type === 'tick') { /* Optional: Add subtle tick sound */ }
+                 else if (type === 'bonus') bonusSynth.triggerAttackRelease("C6", "8n", now);
+                 else if (type === 'tryAgain') synth.triggerAttackRelease("D4", "16n", now);
+                 else if (type === 'modalOpen') synth.triggerAttackRelease("A4", "16n", now);
+                 else if (type === 'modalClose') synth.triggerAttackRelease("F4", "16n", now);
+                 else if (type === 'win') winSynth.triggerAttackRelease(["C4", "E4", "G4"], "2n", now);
+             } catch (error) { console.error("Tone.js error:", error); }
+         }
+
+
+        // --- Core Game Logic Functions (Mostly Unchanged) ---
+
+        function showScreen(screenToShow) {
+            // Stop score animation if running
+            if (scoreAnimationInterval) {
+                clearInterval(scoreAnimationInterval);
+                scoreAnimationInterval = null;
+                scoreDisplay.classList.remove('score-animating');
+            }
+            // Hide all screens initially
+            challengeScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            gameOverScreen.classList.add('hidden');
+            winScreen.classList.add('hidden');
+            exampleModal.classList.add('hidden');
+
+            // Show level select unless game over
+            levelSelectionArea.classList.toggle('hidden', screenToShow === 'gameOver');
+
+            // Show the target screen
+            if (screenToShow === 'challenge') challengeScreen.classList.remove('hidden');
+            else if (screenToShow === 'results') resultsScreen.classList.remove('hidden');
+            else if (screenToShow === 'gameOver') gameOverScreen.classList.remove('hidden');
+            else if (screenToShow === 'win') {
+                winScreen.classList.remove('hidden');
+                // Trigger win icon animation
+                winIcon.classList.remove('animate-icon');
+                void winIcon.offsetWidth; // Reflow trick
+                winIcon.classList.add('animate-icon');
+            }
+        }
+
+         function animateScore(pointsToAdd) {
+             return new Promise(resolve => {
+                 const startDisplayScore = parseInt(scoreDisplay.textContent) || 0;
+                 const targetDisplayScore = startDisplayScore + pointsToAdd;
+                 if (pointsToAdd <= 0) { // Don't animate if no points added
+                    score = targetDisplayScore; // Ensure score state is updated
+                    updateDisplays(); // Update display immediately
+                    resolve();
+                    return;
+                 }
+
+                 let currentDisplayScore = startDisplayScore;
+                 const duration = 500; // ms
+                 const steps = 20; // Number of animation steps
+                 const incrementAmount = pointsToAdd / steps;
+                 const intervalTime = duration / steps;
+
+                 if (scoreAnimationInterval) clearInterval(scoreAnimationInterval);
+                 scoreDisplay.classList.add('score-animating');
+
+                 let stepCount = 0;
+                 scoreAnimationInterval = setInterval(() => {
+                     stepCount++;
+                     currentDisplayScore += incrementAmount;
+
+                     if (stepCount >= steps) {
+                         currentDisplayScore = targetDisplayScore; // Ensure exact final value
+                         clearInterval(scoreAnimationInterval);
+                         scoreAnimationInterval = null;
+                         scoreDisplay.classList.remove('score-animating');
+                         score = currentDisplayScore; // Update actual score state
+                         scoreDisplay.textContent = Math.round(currentDisplayScore);
+                         resolve();
+                     } else {
+                          scoreDisplay.textContent = Math.round(currentDisplayScore);
+                          // Optional: playSound('tick'); // Can add subtle tick here if desired
+                     }
+                 }, intervalTime);
+             });
+         }
+
+        function initializeGame() {
+            console.log("Initializing G2 Methodology Trainer...");
+            score = 0;
+            lives = 5;
+            currentLevel = '';
+            currentChallengeIndex = -1;
+            lastExampleAnswer = "";
+            completedChallengesByLevel = {};
+            completedLevels = [];
+            isEvaluating = false;
+            if (scoreAnimationInterval) clearInterval(scoreAnimationInterval); // Clear any lingering animation
+            scoreAnimationInterval = null;
+
+            updateDisplays();
+            populateLevels();
+            showScreen('challenge'); // Start on challenge screen
+            submitBtn.disabled = true;
+            userPrompt.disabled = false;
+            showExampleBtn.classList.add('hidden');
+            exampleModal.classList.add('hidden');
+
+            // Set default level if available
+            if (levelSelect.options.length > 0) {
+                 levelSelect.value = levelSelect.options[0].value;
+                 changeLevel(); // Load data for the default level
+             } else {
+                // Handle case where gameData might be empty
+                scenarioText.textContent = 'No training modules available!';
+                weakPromptText.textContent = '';
+                submitBtn.disabled = true;
+            }
+
+            console.log("Initialization complete.");
+        }
+
+        function populateLevels() {
+            const currentSelectedValue = levelSelect.value;
+            levelSelect.innerHTML = ''; // Clear existing options
+            const levels = Object.keys(gameData);
+            levels.forEach(level => {
+                const option = document.createElement('option');
+                option.value = level;
+                let levelText = level; // Display name is the key
+
+                if (completedLevels.includes(level)) {
+                    option.textContent = `✅ ${levelText}`; // Add checkmark if completed
+                    option.classList.add('completed-level');
+                } else {
+                     option.textContent = levelText;
+                     option.classList.remove('completed-level');
+                }
+                levelSelect.appendChild(option);
+            });
+            // Reselect previous or first level
+             if (levels.includes(currentSelectedValue)) {
+                 levelSelect.value = currentSelectedValue;
+             } else if (levels.length > 0) {
+                  levelSelect.value = levels[0];
+             }
+        }
+
+         function changeLevel() {
+             currentLevel = levelSelect.value;
+             if (!currentLevel) return; // Exit if no level selected
+
+             if (!completedChallengesByLevel[currentLevel]) {
+                 completedChallengesByLevel[currentLevel] = []; // Initialize completion array for level
+             }
+             currentChallengeIndex = -1; // Reset index for the new level
+             loadChallenge(); // Load the first challenge
+         }
+
+        function loadChallenge() {
+             if (isEvaluating) return; // Prevent loading during evaluation
+             showExampleBtn.classList.add('hidden'); // Hide example button
+
+             // Basic validation for level data
+             if (!currentLevel || !gameData[currentLevel] || gameData[currentLevel].length === 0) {
+                 scenarioText.textContent = 'No questions found for this module!';
+                 weakPromptText.textContent = '';
+                 currentChallengeData = null;
+                 submitBtn.disabled = true;
+                 showScreen('challenge');
+                 return;
+             }
+
+             const levelChallenges = gameData[currentLevel];
+             const totalChallengesInLevel = levelChallenges.length;
+             if (!completedChallengesByLevel[currentLevel]) {
+                  completedChallengesByLevel[currentLevel] = [];
+             }
+             const completedIndices = completedChallengesByLevel[currentLevel];
+
+             // Find available challenges (not yet completed)
+             const availableIndices = levelChallenges.map((_, i) => i).filter(i => !completedIndices.includes(i));
+
+             // Check if level is complete
+             if (availableIndices.length === 0) {
+                 if (totalChallengesInLevel > 0 && !completedLevels.includes(currentLevel)) {
+                    console.log(`Module ${currentLevel} Cleared!`);
+                    winGame(); // Trigger win state for the level
+                 } else {
+                    // If level was already completed or somehow empty
+                    scenarioText.textContent = 'Module already completed or empty!';
+                    weakPromptText.textContent = '';
+                    submitBtn.disabled = true;
+                 }
+                 return;
+             }
+
+             // Select a random available challenge index
+             currentChallengeIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+             currentChallengeData = levelChallenges[currentChallengeIndex];
+
+             // Ensure data loaded correctly
+             if (!currentChallengeData) {
+                 console.error("Error loading challenge data for index:", currentChallengeIndex, "in level:", currentLevel);
+                 isEvaluating = false; loadChallenge(); return; // Attempt to load another
+             }
+
+             // Populate UI
+             scenarioText.textContent = currentChallengeData.scenario;
+             weakPromptText.textContent = `"${currentChallengeData.weakPrompt}"`;
+             lastExampleAnswer = currentChallengeData.examplePrompt; // Store for modal
+             userPrompt.value = ''; // Clear previous answer
+             userPrompt.disabled = false;
+             submitBtn.disabled = true; // Disable until user types
+             feedbackOutput.innerHTML = ''; // Clear old feedback
+             resultTitle.textContent = 'Analyzing...'; // Reset result title
+             resultTitle.className = 'text-xl md:text-2xl text-center mb-5'; // Reset title style
+             lastChallengeSuccess = false; // Reset success flag for new challenge
+
+             showScreen('challenge'); // Display the challenge screen
+             playSound('next'); // Play sound for new challenge
+        }
+
+        function retryChallenge() {
+             if (isEvaluating) return;
+             playSound('tryAgain');
+             showExampleBtn.classList.add('hidden'); // Hide example button again
+             userPrompt.disabled = false; // Re-enable input
+             // Re-enable submit button only if there's text
+             submitBtn.disabled = userPrompt.value.trim().length === 0;
+             showScreen('challenge'); // Go back to the challenge screen
+             // Keep userPrompt.value - allows editing previous attempt
+        }
+
+        async function animateResultsScore(feedbackItems, isPerfect, bonusPoints) {
+            const feedbackElements = feedbackOutput.children;
+            tryAgainBtn.disabled = true; // Disable buttons during animation
+            nextChallengeBtn.disabled = true;
+            showExampleBtn.disabled = true;
+
+            // Animate score for each 'good' or 'bonus' item
+            for (let i = 0; i < feedbackItems.length; i++) {
+                const item = feedbackItems[i];
+                const element = feedbackElements[i];
+                if (!element) continue;
+
+                element.classList.add('feedback-highlight');
+                await new Promise(resolve => setTimeout(resolve, 150)); // Highlight pause
+
+                if ((item.type === 'good' || item.type === 'bonus') && item.points > 0) {
+                    await animateScore(item.points); // Animate the score update
+                    if (item.type === 'bonus' && isPerfect) {
+                        playSound('bonus');
+                    }
+                } else {
+                    await new Promise(resolve => setTimeout(resolve, 300)); // Pause longer if not scoring
+                }
+                element.classList.remove('feedback-highlight');
+            }
+
+            updateDisplays(); // Ensure final display matches score state
+
+            // Re-enable buttons after animation completes
+            tryAgainBtn.disabled = false;
+            nextChallengeBtn.disabled = false;
+            // Show example button only if attempt was NOT perfect
+             showExampleBtn.disabled = isPerfect;
+             showExampleBtn.classList.toggle('hidden', isPerfect);
+
+            isEvaluating = false; // Mark evaluation as complete
+        }
+
+        async function evaluatePrompt() {
+            if (isEvaluating) return;
+            isEvaluating = true;
+            lastChallengeSuccess = false;
+
+            playSound('submit');
+            if (!currentChallengeData || !currentChallengeData.feedbackPoints || !currentChallengeData.keywords) {
+                console.error("Missing challenge data/feedback/keywords during evaluation.");
+                isEvaluating = false; return;
+            }
+
+            const currentAnswerText = userPrompt.value;
+            const answerTextLower = currentAnswerText.trim().toLowerCase();
+            const feedbackCriteria = currentChallengeData.feedbackPoints;
+            const keywords = currentChallengeData.keywords;
+            let collectedFeedbackItems = [];
+            let principlesMet = 0;
+            const totalPrinciples = Object.keys(feedbackCriteria).length;
+            let isPerfect = false;
+            let bonusPoints = 0;
+
+            submitBtn.disabled = true; // Disable UI during processing
+            userPrompt.disabled = true;
+            showExampleBtn.classList.add('hidden');
+
+            // --- Evaluate based on keyword presence ---
+            const criteriaKeys = Object.keys(feedbackCriteria);
+            for (const key of criteriaKeys) {
+                const pointText = feedbackCriteria[key];
+                const keywordRegex = keywords[key];
+                let detected = keywordRegex ? keywordRegex.test(answerTextLower) : false;
+                const principleName = key.charAt(0).toUpperCase() + key.slice(1);
+                let pointsAwarded = 0;
+                let feedbackType = 'improve';
+                let feedbackText = `[-] ${principleName} Missing? ${pointText}`;
+
+                if (detected) {
+                    pointsAwarded = 30; // Assign points for meeting criteria
+                    feedbackType = 'good';
+                    feedbackText = `[+] ${principleName} Addressed! (+${pointsAwarded} pts)`;
+                    principlesMet++;
+                }
+                collectedFeedbackItems.push({ type: feedbackType, text: feedbackText, points: pointsAwarded });
+            }
+
+            // --- Determine Outcome ---
+            const successThreshold = Math.ceil(totalPrinciples / 2); // Need > 50% correct
+            if (totalPrinciples > 0 && principlesMet === totalPrinciples) {
+                isPerfect = true;
+                bonusPoints = 100; // Bonus for perfect
+                lastChallengeSuccess = true;
+                collectedFeedbackItems.push({ type: 'bonus', text: `[!] PERFECT ANALYSIS! (+${bonusPoints} BONUS!)`, points: bonusPoints });
+            } else if (principlesMet >= successThreshold && totalPrinciples > 0) {
+                lastChallengeSuccess = true; // Met minimum threshold
+            } else {
+                lastChallengeSuccess = false; // Failed
+            }
+
+            // --- Populate Results Screen (Static Content First) ---
+            feedbackOutput.innerHTML = collectedFeedbackItems.map(item => `<div class="feedback-item feedback-${item.type}">${item.text}</div>`).join('');
+            feedbackOutput.scrollTop = 0; // Scroll to top of feedback
+
+            // --- Set Title, Handle Lives, and Button States ---
+            if (isPerfect) {
+                resultTitle.textContent = 'PERFECT ANALYSIS!';
+                resultTitle.className = 'text-xl md:text-2xl text-center mb-5 flash-perfect';
+                nextChallengeBtn.textContent = 'Next Question';
+                playSound('success'); // Play success sound
+                playSound('bonus'); // Play bonus sound too
+            } else if (lastChallengeSuccess) {
+                resultTitle.textContent = 'Analysis Accepted!';
+                resultTitle.className = 'text-xl md:text-2xl text-center mb-5 flash-success';
+                nextChallengeBtn.textContent = 'Next Question';
+                playSound('success');
+            } else {
+                resultTitle.textContent = 'Analysis Incomplete!';
+                resultTitle.className = 'text-xl md:text-2xl text-center mb-5 flash-fail';
+                lives--;
+                playSound('fail');
+                updateDisplays(); // Update lives display immediately
+                if (lives <= 0) {
+                    gameOver(); return; // End game if out of lives
+                }
+                nextChallengeBtn.textContent = 'Next Question'; // Allow moving on even if failed
+            }
+
+            // --- Show Results and Trigger Animation ---
+            showScreen('results');
+            // Assign button click handlers
+            tryAgainBtn.onclick = retryChallenge;
+            nextChallengeBtn.onclick = () => {
+                if (lastChallengeSuccess && currentChallengeIndex !== -1) {
+                    if (!completedChallengesByLevel[currentLevel]) completedChallengesByLevel[currentLevel] = [];
+                    if (!completedChallengesByLevel[currentLevel].includes(currentChallengeIndex)) {
+                        completedChallengesByLevel[currentLevel].push(currentChallengeIndex);
+                        console.log(`Challenge ${currentChallengeIndex} completed in module ${currentLevel}. Completed:`, completedChallengesByLevel[currentLevel].length);
+                    }
+                }
+                loadChallenge(); // Load next challenge
+            };
+            showExampleBtn.onclick = openExampleModal; // Assign example modal handler
+
+            // Disable buttons before starting animation
+            tryAgainBtn.disabled = true;
+            nextChallengeBtn.disabled = true;
+            showExampleBtn.disabled = true; // Disabled initially, re-enabled by animation function if needed
+
+            // Start the score animation after setting up the screen
+            animateResultsScore(collectedFeedbackItems, isPerfect, bonusPoints);
+        }
+
+        function updateDisplays() {
+            livesDisplay.textContent = lives;
+            if (!scoreAnimationInterval) { // Update score only if not currently animating
+                scoreDisplay.textContent = score;
+            }
+        }
+
+        function gameOver() {
+            playSound('gameOver');
+            finalScoreDisplay.textContent = score;
+            showScreen('gameOver');
+            isEvaluating = false; // Ensure evaluation stops
+        }
+
+        function winGame() { // Called when all challenges in a level are done
+            playSound('win');
+            if (!completedLevels.includes(currentLevel)) {
+                completedLevels.push(currentLevel); // Mark level as fully complete
+            }
+            populateLevels(); // Update dropdown to show checkmark
+            clearedZoneName.textContent = currentLevel; // Display cleared level name
+            showScreen('win');
+            isEvaluating = false;
+        }
+
+        // --- Modal Functions ---
+        function openExampleModal() {
+            playSound('modalOpen');
+            // Clean up citations [cite: X] for display
+            let displayAnswer = lastExampleAnswer.replace(/\[cite: \d+(, \d+)*\]/g, '').trim();
+            modalAnswerDisplay.textContent = displayAnswer;
+            exampleModal.classList.remove('hidden');
+        }
+
+        function closeExampleModal() {
+             playSound('modalClose');
+             exampleModal.classList.add('hidden');
+        }
+
+        // --- Event Listeners ---
+        levelSelect.addEventListener('change', changeLevel);
+        submitBtn.addEventListener('click', evaluatePrompt);
+        restartBtn.addEventListener('click', initializeGame);
+        playAgainBtn.addEventListener('click', initializeGame);
+        // Example modal listeners
+        closeModalBtn.addEventListener('click', closeExampleModal);
+        closeModalBtnInner.addEventListener('click', closeExampleModal);
+        exampleModal.addEventListener('click', (event) => {
+             if (event.target === exampleModal) { closeExampleModal(); } // Close if clicking overlay
+         });
+        // Input listener to enable/disable submit button
+        userPrompt.addEventListener('input', () => {
+            submitBtn.disabled = isEvaluating || userPrompt.value.trim().length === 0;
+        });
+
+        // --- Initialisation ---
+        document.body.addEventListener('click', () => { // Ensure audio context starts
+            if (Tone.context.state !== 'running') {
+                Tone.start().catch(e => console.error("Error starting Tone.js:", e));
+            }
+        }, { once: true });
+        document.addEventListener('DOMContentLoaded', initializeGame); // Start game on load
+
+    </script>
+</body>
+</html>
